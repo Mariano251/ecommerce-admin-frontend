@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, ShoppingCart, Users, DollarSign, TrendingUp, ArrowUpRight, Plus } from 'lucide-react';
+import { Package, ShoppingCart, Users, DollarSign, TrendingUp, ArrowUpRight } from 'lucide-react';
 import { getProducts, getOrders, getClients, createProduct } from '../services/api';
 import Modal from '../components/ui/Modal';
 import ProductForm from '../components/products/ProductForm';
