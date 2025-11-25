@@ -7,7 +7,21 @@ Dashboard de administración moderno y completo para gestionar tu tienda online.
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue)
 ![Vite](https://img.shields.io/badge/Vite-6.0.1-purple)
 
----
+
+## 🌐 **Demo en Vivo**
+
+**🚀 [Ver Demo](https://ecommerce-admin-frontend-flax.vercel.app)**
+
+Accede al dashboard completo en producción. El backend puede no estar disponible, pero la aplicación usa datos de prueba para demostración.
+
+**Funcionalidades disponibles en la demo:**
+- ✅ Dashboard interactivo con gráficos
+- ✅ Gestión completa de productos
+- ✅ Gestión completa de categorías
+- ✅ Sistema de notificaciones
+- ✅ Filtros y búsqueda avanzada
+- ✅ Exportar datos a CSV
+
 
 ## 🚀 **Características Principales**
 
