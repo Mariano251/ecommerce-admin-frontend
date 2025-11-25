@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Package, ShoppingCart, Users, DollarSign, TrendingUp, ArrowUpRight } from 'lucide-react';
-import { getProducts, getOrders, getClients } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { Package, ShoppingCart, Users, DollarSign, TrendingUp, ArrowUpRight, Plus } from 'lucide-react';
+import { getProducts, getOrders, getClients, createProduct } from '../services/api';
+import Modal from '../components/ui/Modal';
+import ProductForm from '../components/products/ProductForm';
+import type { ProductFormData } from '../components/products/ProductForm';
+import { useToast } from '../components/ui/ToastContainer';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalOrders: 0,
@@ -39,6 +48,18 @@ export default function Dashboard() {
     }
   };
 
+  const handleCreateProduct = async (data: ProductFormData) => {
+    try {
+      await createProduct(data);
+      setIsModalOpen(false);
+      showToast('Producto creado exitosamente!', 'success');
+      loadStats(); // Recargar estadísticas
+    } catch (error) {
+      console.error('Error creating product:', error);
+      showToast('Error al crear el producto. Verifica que el backend esté funcionando.', 'error');
+    }
+  };
+
   const statCards = [
     {
       title: 'Total Productos',
@@ -68,6 +89,24 @@ export default function Dashboard() {
       gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
       change: '+15%',
     },
+  ];
+
+  const quickActions = [
+    {
+      label: 'Agregar Producto',
+      onClick: () => setIsModalOpen(true),
+      primary: true
+    },
+    {
+      label: 'Ver Órdenes',
+      onClick: () => navigate('/orders'),
+      primary: false
+    },
+    {
+      label: 'Gestionar Inventario',
+      onClick: () => navigate('/products'),
+      primary: false
+    }
   ];
 
   if (loading) {
@@ -264,35 +303,173 @@ export default function Dashboard() {
           </p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {['Agregar Producto', 'Ver Órdenes', 'Gestionar Inventario'].map((action, idx) => (
-              <button key={idx} style={{
-                width: '100%',
-                backgroundColor: idx === 0 ? 'white' : 'rgba(255, 255, 255, 0.15)',
-                color: idx === 0 ? '#3B82F6' : 'white',
-                padding: '14px 20px',
-                borderRadius: '12px',
-                fontWeight: '600',
-                fontSize: '15px',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'all 0.2s',
-                backdropFilter: 'blur(10px)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = idx === 0 ? '#F3F4F6' : 'rgba(255, 255, 255, 0.25)';
-                e.currentTarget.style.transform = 'translateX(4px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = idx === 0 ? 'white' : 'rgba(255, 255, 255, 0.15)';
-                e.currentTarget.style.transform = 'translateX(0)';
-              }}
+            {quickActions.map((action, idx) => (
+              <button 
+                key={idx}
+                onClick={action.onClick}
+                style={{
+                  width: '100%',
+                  backgroundColor: action.primary ? 'white' : 'rgba(255, 255, 255, 0.15)',
+                  color: action.primary ? '#3B82F6' : 'white',
+                  padding: '14px 20px',
+                  borderRadius: '12px',
+                  fontWeight: '600',
+                  fontSize: '15px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.2s',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = action.primary ? '#F3F4F6' : 'rgba(255, 255, 255, 0.25)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = action.primary ? 'white' : 'rgba(255, 255, 255, 0.15)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
               >
-                <span>{action}</span>
+                <span>{action.label}</span>
                 <ArrowUpRight size={18} />
               </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+        gap: '24px',
+        marginBottom: '32px'
+      }}>
+        {/* Sales Chart */}
+        <div style={{
+          background: 'rgba(31, 41, 55, 0.5)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '16px',
+          padding: '28px',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#F9FAFB', marginBottom: '24px' }}>
+            Ventas Mensuales
+          </h2>
+          <div style={{ width: '100%', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{
+              width: '100%',
+              height: '280px',
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-around',
+              padding: '20px',
+              gap: '8px'
+            }}>
+              {[
+                { month: 'Ene', value: 4200, height: '60%' },
+                { month: 'Feb', value: 3800, height: '52%' },
+                { month: 'Mar', value: 5100, height: '75%' },
+                { month: 'Abr', value: 4600, height: '65%' },
+                { month: 'May', value: 6200, height: '92%' },
+                { month: 'Jun', value: 5800, height: '85%' },
+              ].map((data, idx) => (
+                <div key={idx} style={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    width: '100%',
+                    height: data.height,
+                    background: 'linear-gradient(180deg, #3B82F6 0%, #8B5CF6 100%)',
+                    borderRadius: '8px 8px 0 0',
+                    position: 'relative',
+                    transition: 'all 0.3s',
+                    cursor: 'pointer',
+                    boxShadow: '0 -4px 12px rgba(59, 130, 246, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scaleY(1.05)';
+                    e.currentTarget.style.boxShadow = '0 -8px 20px rgba(59, 130, 246, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scaleY(1)';
+                    e.currentTarget.style.boxShadow = '0 -4px 12px rgba(59, 130, 246, 0.3)';
+                  }}
+                  >
+                    <div style={{
+                      position: 'absolute',
+                      top: '-25px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      color: '#10B981',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      ${data.value}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#9CA3AF' }}>
+                    {data.month}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Category Distribution */}
+        <div style={{
+          background: 'rgba(31, 41, 55, 0.5)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '16px',
+          padding: '28px',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#F9FAFB', marginBottom: '24px' }}>
+            Productos por Categoría
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {[
+              { category: 'Electrónica', count: 45, percentage: 35, color: '#3B82F6' },
+              { category: 'Ropa', count: 32, percentage: 25, color: '#10B981' },
+              { category: 'Hogar', count: 28, percentage: 22, color: '#8B5CF6' },
+              { category: 'Deportes', count: 23, percentage: 18, color: '#F59E0B' },
+            ].map((item, idx) => (
+              <div key={idx}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#F3F4F6' }}>
+                    {item.category}
+                  </span>
+                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#9CA3AF' }}>
+                    {item.count} productos ({item.percentage}%)
+                  </span>
+                </div>
+                <div style={{
+                  width: '100%',
+                  height: '10px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: `${item.percentage}%`,
+                    height: '100%',
+                    background: item.color,
+                    borderRadius: '10px',
+                    transition: 'width 1s ease-out',
+                    boxShadow: `0 0 10px ${item.color}80`
+                  }}></div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -331,6 +508,18 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Modal para Agregar Producto */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Nuevo Producto"
+      >
+        <ProductForm
+          onSubmit={handleCreateProduct}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      </Modal>
 
       <style>{`
         @keyframes spin {

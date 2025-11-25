@@ -23,6 +23,9 @@ export const deleteProduct = (id: number) => api.delete(`/products/${id}`);
 export const getCategories = () => api.get<Category[]>('/categories');
 export const createCategory = (data: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => 
   api.post<Category>('/categories', data);
+export const updateCategory = (id: number, data: Partial<Category>) => 
+  api.put<Category>(`/categories/${id}`, data);
+export const deleteCategory = (id: number) => api.delete(`/categories/${id}`);
 
 // Clients
 export const getClients = () => api.get<Client[]>('/clients');
