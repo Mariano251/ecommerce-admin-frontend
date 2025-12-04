@@ -5,7 +5,7 @@ export interface Product {
   price: number;
   stock: number;
   category_id: number;
-  image_url: string;
+  image_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -78,5 +78,21 @@ export interface Review {
   product_id: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface DashboardStats {
+  totalProducts: number;
+  totalOrders: number;
+  lowStockProducts: number;
+  totalRevenue: number;
+}
+
+export interface StoreState {
+  products: Product[];
+  categories: Category[];
+  orders: Order[];
+  dashboardStats: DashboardStats | null;
+  loading: boolean;
+  error: string | null;
 }
 
