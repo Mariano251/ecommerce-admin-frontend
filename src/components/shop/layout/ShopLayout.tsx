@@ -1,5 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import ShopNavbar from './ShopNavbar';
+import ResponsiveNavbar from './ResponsiveNavbar';
+import "bootstrap/dist/css/bootstrap.min.css";
+
 
 export default function ShopLayout() {
   return (
@@ -21,7 +24,7 @@ export default function ShopLayout() {
       }}></div>
 
       {/* Navbar */}
-      <ShopNavbar />
+      <ResponsiveNavbar />
 
       {/* Main Content */}
       <main style={{

@@ -1,0 +1,67 @@
+/* Desktop visible por defecto */
+.navbar-desktop {
+  display: block;
+}
+
+/* Mobile oculto por defecto */
+.navbar-mobile {
+  display: none;
+}
+
+/* Cambia a mobile cuando la pantalla es <= 992px */
+@media (max-width: 992px) {
+  .navbar-desktop {
+    display: none;
+  }
+
+  .navbar-mobile {
+    display: block;
+  }
+}
+
+/* Fondo premium del offcanvas */
+.custom-offcanvas {
+  background: rgba(10, 14, 39, 0.95) !important;
+  backdrop-filter: blur(20px);
+  padding: 20px;
+}
+
+/* Título */
+.custom-offcanvas .offcanvas-title {
+  color: #F9FAFB;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+/* Links del menú */
+.custom-offcanvas .nav-link {
+  color: #E5E7EB !important;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 12px 0;
+  transition: color 0.2s ease;
+}
+
+/* Hover violeta */
+.custom-offcanvas .nav-link:hover {
+  color: #8B5CF6 !important;
+}
+
+/* Espaciado general */
+.nav-links {
+  margin-top: 10px;
+}
+
+/* Botón de cierre blanco */
+.custom-offcanvas .btn-close {
+  filter: invert(1);
+  opacity: 0.8;
+}
+
+.custom-offcanvas .btn-close:hover {
+  opacity: 1;
+}
+
+.navbar-toggler-icon {
+  filter: invert(1) brightness(3);
+}
