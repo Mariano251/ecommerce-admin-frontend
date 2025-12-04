@@ -134,7 +134,7 @@ export default function ShopLayout() {
                 📱 +52 55 1234 5678
               </p>
               <p style={{ color: '#9CA3AF', fontSize: '14px' }}>
-                📍 Ciudad de México, México
+                📍 Ciudad de Mendoza, Argentina.
               </p>
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function ShopLayout() {
           textAlign: 'center'
         }}>
           <p style={{ color: '#6B7280', fontSize: '14px' }}>
-            © 2024 ShopHub. Todos los derechos reservados. Desarrollado por Mariano Lopez
+            © 2025 ShopHub. Todos los derechos reservados. Desarrollado por Mariano Lopez
           </p>
         </div>
       </footer>

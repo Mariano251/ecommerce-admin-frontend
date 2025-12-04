@@ -123,7 +123,7 @@ export default function ShopNavbar() {
             <div style={{ flex: 1 }}></div>
 
             {/* Search Bar */}
-            <div style={{
+            {/*<div style={{
               position: 'relative',
               width: '220px',
               maxWidth: '280px',
@@ -162,7 +162,7 @@ export default function ShopNavbar() {
                   target.style.background = 'rgba(255, 255, 255, 0.05)';
                 }}
               />
-            </div>
+            </div>*/}
 
             {/* Icons */}
             <div style={{ 

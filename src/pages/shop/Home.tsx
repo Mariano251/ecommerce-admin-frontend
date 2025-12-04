@@ -112,7 +112,7 @@ export default function Home() {
                   fontWeight: '600',
                   color: '#8B5CF6'
                 }}>
-                  Nueva Colección 2024
+                  Nueva Colección 2026
                 </span>
               </div>
 
