@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos personalizados para selectores y opciones */
+select {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #F3F4F6 !important;
+}
+
+select option {
+  background-color: #1A1F3A !important;
+  color: #F3F4F6 !important;
+  padding: 10px !important;
+}
+
+select option:hover {
+  background-color: #667EEA !important;
+  color: white !important;
+}
+
+select option:checked {
+  background-color: #667EEA !important;
+  color: white !important;
+}
+
+/* Scrollbar personalizado para los selectores */
+select::-webkit-scrollbar {
+  width: 8px;
+}
+
+select::-webkit-scrollbar-track {
+  background: #1A1F3A;
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: #667EEA;
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: #764BA2;
+}
+
+/* Estilos globales para inputs y textareas */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
