@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 
 export default function ShopNavbar() {
@@ -119,91 +119,56 @@ export default function ShopNavbar() {
               </Link>
             </div>
 
-            {/* Spacer - empuja los iconos a la derecha */}
+            {/* Spacer - empuja el carrito a la derecha */}
             <div style={{ flex: 1 }}></div>
 
-            {/* Icons */}
-            <div style={{ 
-              display: 'flex', 
-              gap: '12px', 
+            {/* Cart Icon with Badge - SOLO ESTE QUEDA */}
+            <Link to="/cart" style={{
+              position: 'relative',
+              width: '40px',
+              height: '40px',
+              background: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
+              borderRadius: '10px',
+              display: 'flex',
               alignItems: 'center',
-              flexShrink: 0
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              textDecoration: 'none',
+              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              const target = e.currentTarget as HTMLElement;
+              target.style.transform = 'translateY(-2px)';
+              target.style.boxShadow = '0 8px 20px rgba(102, 126, 234, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              const target = e.currentTarget as HTMLElement;
+              target.style.transform = 'translateY(0)';
+              target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
             }}>
-              {/* User Icon */}
-              <Link to="/admin" style={{
-                width: '40px',
-                height: '40px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(102, 126, 234, 0.2)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                textDecoration: 'none'
-              }}
-              onMouseEnter={(e) => {
-                const target = e.currentTarget as HTMLElement;
-                target.style.background = 'rgba(102, 126, 234, 0.15)';
-                target.style.borderColor = '#667EEA';
-              }}
-              onMouseLeave={(e) => {
-                const target = e.currentTarget as HTMLElement;
-                target.style.background = 'rgba(255, 255, 255, 0.05)';
-                target.style.borderColor = 'rgba(102, 126, 234, 0.2)';
-              }}>
-                <User size={18} color="#F3F4F6" />
-              </Link>
-
-              {/* Cart Icon with Badge */}
-              <Link to="/cart" style={{
-                position: 'relative',
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                textDecoration: 'none',
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-              }}
-              onMouseEnter={(e) => {
-                const target = e.currentTarget as HTMLElement;
-                target.style.transform = 'translateY(-2px)';
-                target.style.boxShadow = '0 8px 20px rgba(102, 126, 234, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                const target = e.currentTarget as HTMLElement;
-                target.style.transform = 'translateY(0)';
-                target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-              }}>
-                <ShoppingCart size={18} color="white" />
-                {cartCount > 0 && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '-6px',
-                    right: '-6px',
-                    background: '#EF4444',
-                    color: 'white',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '2px solid #0A0E27'
-                  }}>
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-            </div>
+              <ShoppingCart size={18} color="white" />
+              {cartCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-6px',
+                  right: '-6px',
+                  background: '#EF4444',
+                  color: 'white',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid #0A0E27'
+                }}>
+                  {cartCount}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       </nav>
