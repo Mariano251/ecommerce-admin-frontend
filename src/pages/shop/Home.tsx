@@ -27,8 +27,8 @@ export default function Home() {
         getCategories(),
       ]);
 
-      setFeaturedProducts(productsResponse.data.slice(0, 8));
-      setCategories(categoriesResponse.data.slice(0, 4));
+      setFeaturedProducts(Array.isArray(productsResponse.data) ? productsResponse.data.slice(0, 8) : []);
+      setCategories(Array.isArray(categoriesResponse.data) ? categoriesResponse.data.slice(0, 4) : []);
 
     } catch (error) {
       console.error('Error loading data:', error);
