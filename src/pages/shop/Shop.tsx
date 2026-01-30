@@ -31,10 +31,14 @@ export default function Shop() {
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const productsResponse = await getProducts();
-        setProducts(productsResponse.data);
-        setFilteredProducts(productsResponse.data);
-      } catch (error) {
+              const productsResponse = await getProducts();
+              if (Array.isArray(productsResponse.data)) {
+                setProducts(productsResponse.data);
+                setFilteredProducts(productsResponse.data);
+              } else {
+                setProducts([]);
+                setFilteredProducts([]);
+              }      } catch (error) {
         console.error('Error loading products:', error);
         setProducts([]);
         setFilteredProducts([]);

@@ -44,8 +44,16 @@ export default function Products() {
         getProducts(),
         getCategories()
       ]);
-      setProducts(productsResponse.data);
-      setCategories(categoriesResponse.data);
+      if (Array.isArray(productsResponse.data)) {
+        setProducts(productsResponse.data);
+      } else {
+        setProducts([]);
+      }
+      if (Array.isArray(categoriesResponse.data)) {
+        setCategories(categoriesResponse.data);
+      } else {
+        setCategories([]);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       showToast('Error al cargar los datos', 'error');

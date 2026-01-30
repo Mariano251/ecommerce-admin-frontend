@@ -26,7 +26,11 @@ export default function Categories() {
     try {
       setLoading(true);
       const response = await getCategories();
-      setCategories(response.data);
+      if (Array.isArray(response.data)) {
+        setCategories(response.data);
+      } else {
+        setCategories([]);
+      }
     } catch (error) {
       console.error('Error loading categories:', error);
 
