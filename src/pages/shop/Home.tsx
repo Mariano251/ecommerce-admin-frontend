@@ -1,19 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLocalProducts, getLocalCategories } from '../../services/localStorage';
+
 import type { Product, Category } from '../../types';
 import ProductCard from '../../components/shop/ProductCard';
+import { getProducts, getCategories } from '../../services/api';
 import { ArrowRight, Sparkles, Zap, ShieldCheck, TrendingUp, Laptop, Shirt, House, Dumbbell, Package } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: 'Electrónica', description: 'Lo último en tecnología', created_at: '', updated_at: '' },
-    { id: 2, name: 'Ropa', description: 'Moda y estilo', created_at: '', updated_at: '' },
-    { id: 3, name: 'Hogar', description: 'Decora tu espacio', created_at: '', updated_at: '' },
-    { id: 4, name: 'Deportes', description: 'Mantente activo', created_at: '', updated_at: '' }
-  ]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,21 +19,22 @@ export default function Home() {
   
 
   const loadData = async () => {
-  try {
-    // Cargar productos desde localStorage
-    const localProducts = getLocalProducts();
-    setFeaturedProducts(localProducts.slice(0, 8));
-    
-    // Cargar categorías desde localStorage
-    const localCategories = getLocalCategories();
-    if (localCategories.length > 0) {
-      setCategories(localCategories.slice(0, 4));
+    try {
+      setLoading(true);
+
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        getProducts(),
+        getCategories(),
+      ]);
+
+      setFeaturedProducts(productsResponse.data.slice(0, 8));
+      setCategories(categoriesResponse.data.slice(0, 4));
+
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error loading data:', error);
-  } finally {
-    setLoading(false);
-  }
   };
   const getCategoryIcon = (categoryId: number) => {
     const icons = {
@@ -254,7 +251,7 @@ export default function Home() {
               justifyContent: 'center'
             }}>
               {categories[0] && (() => {
-                const Icon = getCategoryIcon(categories[0].id);
+                const Icon = getCategoryIcon(categories[0].id_key);
                 const colors = getCategoryColor(0);
                 return (
                   <div
@@ -320,7 +317,7 @@ export default function Home() {
               })()}
 
               {categories[1] && (() => {
-                const Icon = getCategoryIcon(categories[1].id);
+                const Icon = getCategoryIcon(categories[1].id_key);
                 const colors = getCategoryColor(1);
                 return (
                   <div
@@ -387,7 +384,7 @@ export default function Home() {
               })()}
 
               {categories[2] && (() => {
-                const Icon = getCategoryIcon(categories[2].id);
+                const Icon = getCategoryIcon(categories[2].id_key);
                 const colors = getCategoryColor(2);
                 return (
                   <div
@@ -605,7 +602,7 @@ export default function Home() {
               gap: '24px'
             }}>
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id_key} product={product} />
               ))}
             </div>
           ) : (

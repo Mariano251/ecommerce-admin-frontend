@@ -163,7 +163,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {cart.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.id_key}
                   style={{
                     background: 'rgba(26, 31, 58, 0.7)',
                     border: '1px solid rgba(102, 126, 234, 0.2)',
@@ -183,7 +183,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     background: 'rgba(0, 0, 0, 0.2)'
                   }}>
                     <img
-                      src={item.image_url || 'https://via.placeholder.com/80'}
+                      src={item.image || 'https://via.placeholder.com/80'}
                       alt={item.name}
                       style={{
                         width: '100%',
@@ -230,7 +230,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         padding: '4px'
                       }}>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id_key, item.quantity - 1)}
                           style={{
                             width: '32px',
                             height: '32px',
@@ -264,7 +264,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id_key, item.quantity + 1)}
                           disabled={item.quantity >= item.stock}
                           style={{
                             width: '32px',
@@ -298,7 +298,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                       {/* Remove Button */}
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.id_key)}
                         style={{
                           width: '36px',
                           height: '36px',

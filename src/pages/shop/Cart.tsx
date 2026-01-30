@@ -158,7 +158,7 @@ export default function Cart() {
           }}>
             {cart.map((item) => (
               <div
-                key={item.id}
+                key={item.id_key}
                 style={{
                   background: 'rgba(26, 31, 58, 0.7)',
                   backdropFilter: 'blur(20px)',
@@ -174,7 +174,7 @@ export default function Cart() {
               >
                 {/* Product Image */}
                 <div
-                  onClick={() => navigate(`/product/${item.id}`)}
+                  onClick={() => navigate(`/product/${item.id_key}`)}
                   style={{
                     width: '120px',
                     height: '120px',
@@ -186,7 +186,7 @@ export default function Cart() {
                   }}
                 >
                   <img
-                    src={item.image_url || 'https://via.placeholder.com/120'}
+                    src={item.image || 'https://via.placeholder.com/120'}
                     alt={item.name}
                     style={{
                       width: '100%',
@@ -212,7 +212,7 @@ export default function Cart() {
                   gap: '12px'
                 }}>
                   <h3
-                    onClick={() => navigate(`/product/${item.id}`)}
+                    onClick={() => navigate(`/product/${item.id_key}`)}
                     style={{
                       fontSize: '20px',
                       fontWeight: '700',
@@ -273,7 +273,7 @@ export default function Cart() {
                     padding: '8px'
                   }}>
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.id_key, item.quantity - 1)}
                       style={{
                         width: '40px',
                         height: '40px',
@@ -309,7 +309,7 @@ export default function Cart() {
                     </span>
 
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.id_key, item.quantity + 1)}
                       disabled={item.quantity >= item.stock}
                       style={{
                         width: '40px',
@@ -354,7 +354,7 @@ export default function Cart() {
 
                   {/* Remove Button */}
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.id_key)}
                     style={{
                       padding: '10px 20px',
                       background: 'rgba(239, 68, 68, 0.1)',

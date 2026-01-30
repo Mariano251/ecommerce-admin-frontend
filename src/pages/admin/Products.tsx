@@ -2,13 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Search, Edit2, Trash2, Package, Filter, X } from 'lucide-react';
 import type { Product, Category } from '../../types';
 import { useToast } from '../../components/ui/ToastContainer';
-import {
-  getLocalProducts,
-  getLocalCategories,
-  addLocalProduct,
-  updateLocalProduct,
-  deleteLocalProduct
-} from '../../services/localStorage';
+import { getProducts, getCategories, createProduct, updateProduct, deleteProduct } from '../../services/api';
 
 export default function Products() {
   const { showToast } = useToast();
@@ -32,7 +26,8 @@ export default function Products() {
     price: '',
     stock: '',
     category_id: '',
-    image_url: ''
+    image: '',
+    id_key: '' // Added id_key
   });
 
   useEffect(() => {
@@ -43,12 +38,14 @@ export default function Products() {
     filterProducts();
   }, [products, searchQuery, selectedCategory, stockFilter, priceRange, sortBy]);
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      const localProducts = getLocalProducts();
-      const localCategories = getLocalCategories();
-      setProducts(localProducts);
-      setCategories(localCategories);
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        getProducts(),
+        getCategories()
+      ]);
+      setProducts(productsResponse.data);
+      setCategories(categoriesResponse.data);
     } catch (error) {
       console.error('Error loading data:', error);
       showToast('Error al cargar los datos', 'error');
@@ -149,14 +146,14 @@ export default function Products() {
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         category_id: parseInt(formData.category_id),
-        image_url: formData.image_url.trim() || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop'
+        image: formData.image.trim() || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop'
       };
 
       if (editingProduct) {
-        updateLocalProduct(editingProduct.id, productData);
+        await updateProduct(editingProduct.id_key, productData);
         showToast('Producto actualizado exitosamente', 'success');
       } else {
-        addLocalProduct(productData);
+        await createProduct(productData);
         showToast('Producto creado exitosamente', 'success');
       }
 
@@ -176,16 +173,17 @@ export default function Products() {
       price: product.price.toString(),
       stock: product.stock.toString(),
       category_id: product.category_id.toString(),
-      image_url: product.image_url || ''
+      image: product.image || '',
+      id_key: product.id_key.toString()
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id_key: number) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
 
     try {
-      deleteLocalProduct(id);
+      await deleteProduct(id_key);
       showToast('Producto eliminado exitosamente', 'success');
       loadData();
     } catch (error) {
@@ -203,12 +201,13 @@ export default function Products() {
       price: '',
       stock: '',
       category_id: '',
-      image_url: ''
+      image: '',
+      id_key: ''
     });
   };
 
   const getCategoryName = (categoryId: number) => {
-    const category = categories.find(c => c.id === categoryId);
+    const category = categories.find(c => c.id_key === categoryId);
     return category?.name || 'Sin categoría';
   };
 
@@ -433,7 +432,7 @@ export default function Products() {
             >
               <option value="">Todas las categorías</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <option key={cat.id_key} value={cat.id_key}>
                   {cat.name}
                 </option>
               ))}
@@ -579,7 +578,7 @@ export default function Products() {
         }}>
           {filteredProducts.map((product) => (
             <div
-              key={product.id}
+              key={product.id_key}
               style={{
                 background: 'rgba(26, 31, 58, 0.7)',
                 backdropFilter: 'blur(20px)',
@@ -603,7 +602,7 @@ export default function Products() {
               <div style={{
                 width: '100%',
                 height: '200px',
-                background: `url(${product.image_url}) center/cover`,
+                background: `url(${product.image || 'https://via.placeholder.com/400'}) center/cover`,
                 position: 'relative'
               }}>
                 <div style={{
@@ -717,7 +716,7 @@ export default function Products() {
                   </button>
 
                   <button
-                    onClick={() => handleDelete(product.id)}
+                    onClick={() => handleDelete(product.id_key)}
                     style={{
                       flex: 1,
                       padding: '10px',
@@ -1075,7 +1074,7 @@ export default function Products() {
                   >
                     <option value="">Selecciona una categoría</option>
                     {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
+                      <option key={category.id_key} value={category.id_key}>
                         {category.name}
                       </option>
                     ))}
@@ -1094,8 +1093,8 @@ export default function Products() {
                   </label>
                   <input
                     type="url"
-                    name="image_url"
-                    value={formData.image_url}
+                    name="image"
+                    value={formData.image}
                     onChange={handleInputChange}
                     placeholder="https://ejemplo.com/imagen.jpg"
                     style={{
