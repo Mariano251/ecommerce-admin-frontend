@@ -1,36 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Package, Clock, CheckCircle, XCircle, Truck, Eye, Calendar} from 'lucide-react';
 import { useToast } from '../../components/ui/ToastContainer';
-import { getLocalOrders, updateLocalOrderStatus } from '../../services/localStorage';
 
-interface OrderItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image_url?: string;
-}
 
-interface CustomerInfo {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-}
-
-interface Order {
-  id: number;
-  date: string;
-  total: number;
-  delivery_method: number;
-  status: string;
-  client_id: number;
-  bill_id: number;
-  created_at: string;
-  updated_at: string;
-  items?: OrderItem[];
-  customerInfo?: CustomerInfo;
-}
+import { getOrders, updateOrderStatus, getClient, getOrderDetails, getProduct } from '../../services/api';
+import type { Order, OrderItem, CustomerInfo } from '../../types';
 
 export default function Orders() {
   const { showToast } = useToast();
@@ -43,11 +17,47 @@ export default function Orders() {
     loadOrders();
   }, []);
 
-  const loadOrders = () => {
+  const loadOrders = async () => {
     try {
-      const localOrders = getLocalOrders();
-      // Ordenar por fecha más reciente primero
-      const sortedOrders = localOrders.sort((a, b) => 
+      setLoading(true);
+      const ordersResponse = await getOrders();
+      const fetchedOrders: Order[] = ordersResponse.data;
+
+      // Fetch client info and order items for each order
+                const ordersWithDetails = await Promise.all(
+                  fetchedOrders.map(async (order) => {
+                    const clientResponse = await getClient(order.client_id);
+                    const customerInfo: CustomerInfo = {
+                      name: clientResponse.data.name,
+                      email: clientResponse.data.email,
+                      phone: clientResponse.data.phone,
+                      address: clientResponse.data.address,
+                    };
+      
+                    const orderDetailsResponse = await getOrderDetails(order.id_key);
+                    const orderItems: OrderItem[] = await Promise.all(
+                      orderDetailsResponse.data.map(async (detail) => {
+                        const productResponse = await getProduct(detail.product_id);
+                        const product = productResponse.data;
+      
+                        return {
+                          id_key: detail.id_key,
+                          name: product?.name || 'Unknown Product',
+                          price: detail.price,
+                          quantity: detail.quantity,
+                          image_url: product?.image,
+                        };
+                      })
+                    );
+          return {
+            ...order,
+            customerInfo,
+            items: orderItems,
+          };
+        })
+      );
+
+      const sortedOrders = ordersWithDetails.sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setOrders(sortedOrders);
@@ -59,11 +69,11 @@ export default function Orders() {
     }
   };
 
-  const handleStatusChange = (orderId: number, newStatus: string) => {
+  const handleStatusChange = async (orderId: number, newStatus: string) => {
     try {
-      updateLocalOrderStatus(orderId, newStatus);
-      loadOrders();
+      await updateOrderStatus(orderId, newStatus);
       showToast('Estado actualizado exitosamente', 'success');
+      loadOrders();
     } catch (error) {
       console.error('Error updating status:', error);
       showToast('Error al actualizar el estado', 'error');
@@ -358,7 +368,7 @@ export default function Orders() {
                  
                   return (
                     <tr
-                      key={order.id}
+                      key={order.id_key}
                       style={{
                         borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
                         transition: 'all 0.2s'
@@ -378,7 +388,7 @@ export default function Orders() {
                         fontWeight: '700',
                         color: '#667EEA'
                       }}>
-                        #{order.id}
+                        #{order.id_key}
                       </td>
                       <td style={{
                         padding: '20px',
@@ -412,7 +422,7 @@ export default function Orders() {
                       <td style={{ padding: '20px' }}>
                         <select
                           value={order.status}
-                          onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                          onChange={(e) => handleStatusChange(order.id_key, e.target.value)}
                           style={{
                             padding: '8px 12px',
                             background: statusInfo.bg,
@@ -561,7 +571,7 @@ export default function Orders() {
                   color: '#F9FAFB',
                   marginBottom: '8px'
                 }}>
-                  Pedido #{selectedOrder.id}
+                  Pedido #{selectedOrder.id_key}
                 </h2>
                 <div style={{
                   display: 'flex',
@@ -678,7 +688,7 @@ export default function Orders() {
                 }}>
                   {selectedOrder.items.map((item) => (
                     <div
-                      key={item.id}
+                      key={item.id_key}
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',

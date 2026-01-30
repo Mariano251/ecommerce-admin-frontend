@@ -2,22 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, ShoppingCart, DollarSign, TrendingUp, ArrowUpRight, Clock, CheckCircle, Truck } from 'lucide-react';
 import { useToast } from '../../components/ui/ToastContainer';
-import { getLocalProducts, getLocalOrders, getLocalCategories, addLocalProduct } from '../../services/localStorage';
-import type { Category } from '../../types';
+import { getProducts, getOrders, getCategories, createProduct } from '../../services/api';
+import type { Order, Category } from '../../types';
 
-interface Order {
-  id: number;
-  date: string;
-  total: number;
-  delivery_method: number;
-  status: string;
-  created_at: string;
-  items?: any[];
-  customerInfo?: {
-    name: string;
-    email: string;
-  };
-}
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -49,25 +37,26 @@ export default function Dashboard() {
     loadStats();
   }, []);
 
-  const loadStats = () => {
+  const loadStats = async () => {
     try {
       setLoading(true);
       
-      // Cargar productos
-      const products = getLocalProducts();
+      const [productsResponse, ordersResponse, categoriesResponse] = await Promise.all([
+        getProducts(),
+        getOrders(),
+        getCategories(),
+      ]);
+
+      const products = productsResponse.data;
+      const orders = ordersResponse.data;
+      const cats = categoriesResponse.data;
+      setCategories(cats);
+
       const lowStockProducts = products.filter(p => p.stock < 10);
-      
-      // Cargar órdenes
-      const orders = getLocalOrders();
       const revenue = orders.reduce((sum, order) => sum + order.total, 0);
       
-      // Cargar categorías
-      const cats = getLocalCategories();
-      setCategories(cats);
-      
-      // Calcular estadísticas por categoría
       const categoryData = cats.map(cat => {
-        const categoryProducts = products.filter(p => p.category_id === cat.id);
+        const categoryProducts = products.filter(p => p.category_id === cat.id_key);
         const percentage = products.length > 0 
           ? Math.round((categoryProducts.length / products.length) * 100)
           : 0;
@@ -76,7 +65,7 @@ export default function Dashboard() {
           category: cat.name,
           count: categoryProducts.length,
           percentage: percentage,
-          color: getCategoryColor(cat.id)
+          color: getCategoryColor(cat.id_key)
         };
       });
 
@@ -87,7 +76,6 @@ export default function Dashboard() {
         totalRevenue: revenue,
       });
 
-      // Obtener las 3 órdenes más recientes
       const sortedOrders = orders
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 3);
@@ -126,7 +114,7 @@ export default function Dashboard() {
         image_url: formData.image_url.trim() || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop'
       };
 
-      addLocalProduct(productData);
+      await createProduct(productData);
       showToast('Producto creado exitosamente', 'success');
       closeModal();
       loadStats(); // Recargar estadísticas
@@ -405,7 +393,7 @@ export default function Dashboard() {
                 const statusColor = getOrderStatusColor(order.status);
                 
                 return (
-                  <div key={order.id} style={{
+                  <div key={order.id_key} style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '16px',
@@ -440,7 +428,7 @@ export default function Dashboard() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: '14px', fontWeight: '600', color: '#F3F4F6', marginBottom: '4px' }}>
-                        Pedido #{order.id} - {order.customerInfo?.name || 'Cliente'}
+                        Pedido #{order.id_key} - {order.customerInfo?.name || 'Cliente'}
                       </p>
                       <p style={{ fontSize: '13px', color: '#9CA3AF' }}>
                         {getTimeAgo(order.created_at)} • {getOrderStatusLabel(order.status)}
@@ -856,7 +844,7 @@ export default function Dashboard() {
                   >
                     <option value="">Selecciona una categoría</option>
                     {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
+                      <option key={category.id_key} value={category.id_key}>
                         {category.name}
                       </option>
                     ))}

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastProvider } from './components/ui/ToastContainer';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
-import { initializeLocalStorage } from './services/localStorage';
+
 
 // Admin Components
 import AdminLayout from './components/admin/layout/Layout';
@@ -25,7 +25,7 @@ import MyOrders from './pages/shop/MyOrders';
 
 function App() {
   useEffect(() => {
-    initializeLocalStorage();
+
   }, []);
 
   return (

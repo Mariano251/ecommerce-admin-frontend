@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getLocalProducts } from '../../services/localStorage';
+
 import type { Product } from '../../types';
+import { getProducts } from '../../services/api';
 import ProductCard from '../../components/shop/ProductCard';
 import FilterSidebar from '../../components/shop/FilterSidebar';
 import { Search, Grid, List, SlidersHorizontal, X } from 'lucide-react';
@@ -27,27 +28,20 @@ export default function Shop() {
     applyFilters();
   }, [products, searchQuery, selectedCategory, minPrice, maxPrice, sortBy]);
 
-  const loadProducts = async () => {
-    try {
-      // Asegurarse de que el loading esté en true antes de cargar
-      setLoading(true); 
-      // Cargar productos desde localStorage
-      const localProducts = getLocalProducts();
-      setProducts(localProducts);
-      setFilteredProducts(localProducts);
-    } catch (error) {
-      console.error('Error loading products:', error);
-      setProducts([]);
-      setFilteredProducts([]);
-    } finally {
-      // Se establece en false una vez que la carga finaliza
-      // Se agrega un pequeño timeout para simular una carga real y que el spinner se vea
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
-    }
-  };
-
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const productsResponse = await getProducts();
+        setProducts(productsResponse.data);
+        setFilteredProducts(productsResponse.data);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        setProducts([]);
+        setFilteredProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
   const applyFilters = () => {
     let filtered = [...products];
 
@@ -363,8 +357,7 @@ export default function Shop() {
             gap: '24px'
           }}>
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+                             <ProductCard key={product.id_key} product={product} />            ))}
           </div>
         ) : (
           <div style={{

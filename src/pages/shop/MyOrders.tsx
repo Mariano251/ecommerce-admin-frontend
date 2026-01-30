@@ -1,36 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Clock, CheckCircle, XCircle, Truck, Calendar } from 'lucide-react';
-import { getLocalOrders } from '../../services/localStorage';
-
-interface OrderItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image_url?: string;
-}
-
-interface CustomerInfo {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-}
-
-interface Order {
-  id: number;
-  date: string;
-  total: number;
-  delivery_method: number;
-  status: string;
-  client_id: number;
-  bill_id: number;
-  created_at: string;
-  updated_at: string;
-  items?: OrderItem[];
-  customerInfo?: CustomerInfo;
-}
+import { getOrders, getClient, getOrderDetails, getProduct } from '../../services/api';
+import type { Order, OrderItem, CustomerInfo } from '../../types';
 
 export default function MyOrders() {
   const navigate = useNavigate();
@@ -41,12 +13,47 @@ export default function MyOrders() {
     loadOrders();
   }, []);
 
-  const loadOrders = () => {
+  const loadOrders = async () => {
     try {
-      // Cargar órdenes desde localStorage compartido
-      const localOrders = getLocalOrders();
-      // Ordenar por fecha más reciente primero
-      const sortedOrders = localOrders.sort((a, b) => 
+      setLoading(true);
+      const ordersResponse = await getOrders();
+      const fetchedOrders: Order[] = ordersResponse.data;
+
+      const ordersWithDetails = await Promise.all(
+        fetchedOrders.map(async (order) => {
+          const clientResponse = await getClient(order.client_id);
+          const customerInfo: CustomerInfo = {
+            name: clientResponse.data.name,
+            email: clientResponse.data.email,
+            phone: clientResponse.data.phone,
+            address: clientResponse.data.address,
+          };
+
+          const orderDetailsResponse = await getOrderDetails(order.id_key);
+          const orderItems: OrderItem[] = await Promise.all(
+            orderDetailsResponse.data.map(async (detail) => {
+              const productResponse = await getProduct(detail.product_id);
+              const product = productResponse.data;
+
+              return {
+                id_key: detail.id_key,
+                name: product?.name || 'Unknown Product',
+                price: detail.price,
+                quantity: detail.quantity,
+                image_url: product?.image,
+              };
+            })
+          );
+
+          return {
+            ...order,
+            customerInfo,
+            items: orderItems,
+          };
+        })
+      );
+
+      const sortedOrders = ordersWithDetails.sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setOrders(sortedOrders);
@@ -163,7 +170,7 @@ export default function MyOrders() {
 
               return (
                 <div
-                  key={order.id}
+                  key={order.id_key}
                   style={{
                     background: 'rgba(26, 31, 58, 0.7)',
                     backdropFilter: 'blur(20px)',
@@ -216,7 +223,7 @@ export default function MyOrders() {
                             fontWeight: '700',
                             color: '#F9FAFB'
                           }}>
-                            Pedido #{order.id}
+                            Pedido #{order.id_key}
                           </h3>
                           <div style={{
                             display: 'flex',
@@ -281,7 +288,7 @@ export default function MyOrders() {
                       }}>
                         {order.items.map((item, index) => (
                           <div
-                            key={`${item.id}-${index}`}
+                            key={`${item.id_key}-${index}`}
                             style={{
                               display: 'flex',
                               justifyContent: 'space-between',
@@ -431,7 +438,7 @@ export default function MyOrders() {
                           : 'Sin productos';
                         
                         alert(
-                          `📦 PEDIDO #${order.id}\n\n` +
+                          `📦 PEDIDO #${order.id_key}\n\n` +
                           `💰 Total: $${order.total.toFixed(2)}\n` +
                           `📊 Estado: ${statusInfo.label}\n` +
                           `🚚 Método: ${getDeliveryMethodLabel(order.delivery_method)}\n` +

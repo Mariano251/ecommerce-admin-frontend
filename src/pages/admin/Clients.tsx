@@ -108,7 +108,7 @@ export default function Clients() {
         }}>
           {clients.map((client) => (
             <div
-              key={client.id}
+              key={client.id_key}
               style={{
                 background: 'rgba(31, 41, 55, 0.5)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -133,7 +133,7 @@ export default function Clients() {
                 <div style={{
                   width: '64px',
                   height: '64px',
-                  background: getAvatarGradient(client.id),
+                  background: getAvatarGradient(client.id_key),
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -152,7 +152,7 @@ export default function Clients() {
                     {client.name}
                   </h3>
                   <p style={{ fontSize: '13px', color: '#9CA3AF', fontWeight: '500' }}>
-                    ID: #{client.id}
+                    ID: #{client.id_key}
                   </p>
                 </div>
               </div>

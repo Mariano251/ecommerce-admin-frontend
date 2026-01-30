@@ -24,7 +24,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const handleCardClick = () => {
-    navigate(`/product/${product.id}`);
+    navigate(`/product/${product.id_key}`);
   };
 
   return (
@@ -64,7 +64,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         background: 'rgba(0, 0, 0, 0.2)'
       }}>
         <img
-          src={product.image_url || 'https://via.placeholder.com/400'}
+          src={product.image || 'https://via.placeholder.com/400'}
           alt={product.name}
           style={{
             position: 'absolute',
@@ -130,7 +130,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           lineHeight: '1.6',
           flex: 1
         }}>
-          {product.description.substring(0, 80)}...
+          {product.description ? `${product.description.substring(0, 80)}${product.description.length > 80 ? '...' : ''}` : 'Sin descripción disponible.'}
         </p>
 
         {/* Reviews */}

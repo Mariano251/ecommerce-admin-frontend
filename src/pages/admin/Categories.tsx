@@ -29,44 +29,14 @@ export default function Categories() {
       setCategories(response.data);
     } catch (error) {
       console.error('Error loading categories:', error);
-      // Mock data para pruebas cuando el backend no está disponible
-      setCategories([
-        {
-          id: 1,
-          name: 'Electrónica',
-          description: 'Productos electrónicos y tecnología',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          name: 'Ropa',
-          description: 'Indumentaria y accesorios de moda',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: 3,
-          name: 'Hogar',
-          description: 'Muebles y decoración para el hogar',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: 4,
-          name: 'Deportes',
-          description: 'Equipamiento y ropa deportiva',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-      ]);
+
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    setCategoryToDelete(id);
+  const handleDelete = async (id_key: number) => {
+    setCategoryToDelete(id_key);
     setDeleteConfirmOpen(true);
   };
 
@@ -101,7 +71,7 @@ export default function Categories() {
     if (!editingCategory) return;
     
     try {
-      await updateCategory(editingCategory.id, data);
+      await updateCategory(editingCategory.id_key, data);
       setIsModalOpen(false);
       setEditingCategory(null);
       loadCategories();
@@ -279,7 +249,7 @@ export default function Categories() {
             </thead>
             <tbody>
               {filteredCategories.map((category) => (
-                <tr key={category.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', transition: 'background-color 0.2s' }}
+                <tr key={category.id_key} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', transition: 'background-color 0.2s' }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
@@ -327,7 +297,7 @@ export default function Categories() {
                         <Pencil size={18} color="#60A5FA" />
                       </button>
                       <button
-                        onClick={() => handleDelete(category.id)}
+                        onClick={() => handleDelete(category.id_key)}
                         style={{
                           padding: '10px',
                           backgroundColor: 'transparent',

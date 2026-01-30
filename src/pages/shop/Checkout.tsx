@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../components/ui/ToastContainer';
 import { CreditCard, MapPin, User, ShieldCheck, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { addLocalOrder } from '../../services/localStorage';
+import { createClient, createAddress, createBill, createOrder, createOrderDetail } from '../../services/api';
+
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -50,37 +51,64 @@ export default function Checkout() {
     setLoading(true);
 
     try {
+      // 1. Create Client
+      const clientData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        address: `${formData.street} ${formData.number}, ${formData.city}`
+      };
+      const clientResponse = await createClient(clientData);
+      const client_id = clientResponse.data.id_key;
+
+      // 2. Create Address
+      const addressData = {
+        street: formData.street.trim(),
+        number: formData.number.trim(),
+        city: formData.city.trim(),
+        client_id: client_id
+      };
+      await createAddress(addressData); // No need to store address ID unless it's explicitly used later
+
+      // 3. Create Bill
       const subtotal = getCartTotal();
       const tax = subtotal * 0.16;
       const total = subtotal + tax;
 
-      // Crear orden en localStorage compartido
-      const newOrder = {
-        date: new Date().toISOString(),
+      const billData = {
+        bill_number: `BILL-${Date.now()}`, // Generate a unique bill number
+        discount: 0,
+        total: total,
+        payment_type: 'card' as 'card', // Explicitly cast to 'card'
+        date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      };
+      const billResponse = await createBill(billData);
+      const bill_id = billResponse.data.id_key;
+
+      // 4. Create Order
+      const orderData = {
         total: total,
         delivery_method: Number(formData.deliveryMethod),
         status: 'pending',
-        client_id: 1,
-        bill_id: 1,
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image_url: item.image_url
-        })),
-        customerInfo: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          address: `${formData.street} ${formData.number}, ${formData.city}`
-        }
+        client_id: client_id,
+        bill_id: bill_id,
       };
+      const orderResponse = await createOrder(orderData);
+      const order_id = orderResponse.data.id_key;
 
-      // Guardar orden y actualizar stock automáticamente
-      const savedOrder = addLocalOrder(newOrder);
+      // 5. Create Order Details
+      await Promise.all(
+        cart.map(item =>
+          createOrderDetail({
+            quantity: item.quantity,
+            price: item.price,
+            order_id: order_id,
+            product_id: item.id_key,
+          })
+        )
+      );
 
-      setOrderId(savedOrder.id);
+      setOrderId(order_id);
       setOrderSuccess(true);
       clearCart();
       showToast('¡Pedido realizado exitosamente!', 'success');
@@ -838,7 +866,7 @@ export default function Checkout() {
                 }}>
                   {cart.map((item) => (
                     <div
-                      key={item.id}
+                      key={item.id_key}
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',

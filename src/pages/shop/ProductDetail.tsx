@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft, Package, Shield, Truck,  Minus, Plus } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../components/ui/ToastContainer';
-import { getLocalProducts, getLocalCategories } from '../../services/localStorage';
+
+import { getProduct, getCategories } from '../../services/api';
 import type { Product, Category } from '../../types';
 import ReviewStars from '../../components/shop/ReviewStars';
 
@@ -18,48 +19,43 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
 
-  useEffect(() => {
-    loadProduct();
-    // Agregamos un pequeño retraso para que el estado de carga sea visible
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 800);
-    return () => clearTimeout(timer); // Limpieza del timer
-  }, [id]);
+    useEffect(() => {
+      loadProduct();
+    }, [id]);
+  const loadProduct = async () => {
+    try {
+      setLoading(true); 
+      if (!id) {
+        navigate('/shop');
+        return;
+      }
 
-  const loadProduct = () => {
-    try {
-      // Aseguramos que el loading inicie en true
-      setLoading(true); 
-      if (!id) {
-        navigate('/shop');
-        return;
-      }
+      const productResponse = await getProduct(parseInt(id));
+      const foundProduct = productResponse.data;
 
-      const products = getLocalProducts();
-      const foundProduct = products.find(p => p.id === parseInt(id));
+      if (!foundProduct) {
+        showToast('Producto no encontrado', 'error');
+        navigate('/shop');
+        return;
+      }
 
-      if (!foundProduct) {
-        showToast('Producto no encontrado', 'error');
-        navigate('/shop');
-        return;
-      }
+      setProduct(foundProduct);
 
-      setProduct(foundProduct);
+      const categoriesResponse = await getCategories();
+      const categories = categoriesResponse.data;
+      const foundCategory = categories.find(c => c.id_key === foundProduct.category_id);
+      setCategory(foundCategory || null);
 
-      // Cargar categoría
-      const categories = getLocalCategories();
-      const foundCategory = categories.find(c => c.id === foundProduct.category_id);
-      setCategory(foundCategory || null);
-
-    } catch (error) {
-      console.error('Error loading product:', error);
-      showToast('Error al cargar el producto', 'error');
-      navigate('/shop');
-    } 
-    // NOTA: El `finally` fue movido al `useEffect` con un setTimeout para garantizar 
-    // que el spinner se muestre por un tiempo mínimo, simulando una carga asíncrona.
-  };
+    } catch (error) {
+      console.error('Error loading product:', error);
+      showToast('Error al cargar el producto', 'error');
+      navigate('/shop');
+    } finally {
+      setLoading(false);
+      // NOTA: El `finally` fue movido al `useEffect` con un setTimeout para garantizar 
+      // que el spinner se muestre por un tiempo mínimo, simulando una carga asíncrona.
+    }
+  };
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -148,7 +144,7 @@ export default function ProductDetail() {
   }
 
   const images = [
-    product.image_url || 'https://via.placeholder.com/600',
+    product.image || 'https://via.placeholder.com/600',
     'https://via.placeholder.com/600/667EEA',
     'https://via.placeholder.com/600/764BA2'
   ];
